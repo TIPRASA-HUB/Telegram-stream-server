@@ -1,10 +1,13 @@
+import os
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from uuid import uuid4
 
-TOKEN = '8475420022:AAGsJZyE6FDJXlwhmFz3ejm5anZgxbehd7s'  # Replace with your bot token
+# Get token and owner ID from environment variables
+TOKEN = os.getenv("BOT_TOKEN")
+OWNER_ID = int(os.getenv("OWNER_ID"))
 
-# Temporary memory for file_ids
+# Temporary in-memory storage
 video_storage = {}
 
 def start(update: Update, context: CallbackContext):
@@ -20,8 +23,7 @@ def start(update: Update, context: CallbackContext):
         update.message.reply_text("Hi! Upload a video to get your private link.")
 
 def handle_owner_video(update: Update, context: CallbackContext):
-    owner_id = 8134468900  # Replace with your Telegram user ID
-    if update.effective_user.id != owner_id:
+    if update.effective_user.id != OWNER_ID:
         update.message.reply_text("❌ You're not allowed to upload.")
         return
     
@@ -30,11 +32,11 @@ def handle_owner_video(update: Update, context: CallbackContext):
         file_id = video.file_id
         code = str(uuid4())[:8]
         video_storage[code] = file_id
-
         bot_username = context.bot.username
         deep_link = f"https://t.me/{bot_username}?start={code}"
         update.message.reply_text(f"✅ Video saved!\n🔗 Share this link: {deep_link}")
 
+# Setup bot
 updater = Updater(TOKEN)
 dp = updater.dispatcher
 
